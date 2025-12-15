@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Playwright
+playwright-report/
+test-results/
+.trace/
+*.webm
+*.png
+
+# Auth state
+.auth/
+
+# Environment
+.env*
+
+#IDE
+.vscode/
