@@ -19,8 +19,8 @@ export class CheckoutPage extends BasePage {
         this.zip = this.getByDataTest('postalCode');
         this.continueBtn = this.getByDataTest('continue');
         this.finishBtn = this.getByDataTest('finish');
-        this.total = page.locator('.summary_total_label');
-        this.confirmation = page.locator('.complete-header');
+        this.total = this.getByDataTest('total-label');
+        this.confirmation = this.getByDataTest('complete-header');
     }
 
     async fillCustomerInfo(customer: Customer) {
@@ -31,18 +31,11 @@ export class CheckoutPage extends BasePage {
     }
 
     async getSummaryValues() {
-        const subtotalText = await this.page
-            .locator('.summary_subtotal_label')
-            .textContent();
+        const subtotalText = await this.getByDataTest('subtotal-label').textContent();
 
-        const taxText = await this.page
-            .locator('.summary_tax_label')
-            .textContent();
+        const taxText = await this.getByDataTest('tax-label').textContent();
 
-        const totalText = await this.page
-            .locator('.summary_total_label')
-            .textContent();
-
+        const totalText = await this.getByDataTest('total-label').textContent();
         const subtotal = Number(
             subtotalText?.replace('Item total: $', '')
         );

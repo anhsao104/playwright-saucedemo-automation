@@ -15,11 +15,11 @@ export class InventoryPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.items = page.locator('.inventory_item');
+    this.items = this.getByDataTest('inventory-item');
 
     this.sortDropdown = this.getByDataTest('product-sort-container');
 
-    this.cartLink = page.locator('.shopping_cart_link');
+    this.cartLink = this.getByDataTest('shopping-cart-link');
   }
 
   /**

@@ -9,66 +9,101 @@ test.describe('Inventory sorting', () => {
   });
 
   test('Sort by name A → Z', async ({ inventoryPage }) => {
-    /**
-     * PURPOSE:
-     * Verify products are sorted alphabetically from A to Z.
-     *
-     * EXPECTED RESULT:
-     * Product names appear in ascending alphabetical order.
-     */
 
-    const names = await inventoryPage.sortAndGetNames(SortOption.NAME_ASC);
+    // Step 1: Force the UI into the OPPOSITE state (Z → A) first
+    await inventoryPage.sortAndGetNames(SortOption.NAME_DESC);
 
-    const expected = [...names].sort();
+    // // Step 2: Apply the target "Name (A to Z)" sorting
+    await inventoryPage.sortAndGetNames(SortOption.NAME_ASC);
 
-    expect(names).toEqual(expected);
+    // Step 3: Capture names after sorting
+    const afterNames = await inventoryPage.getItemNames();
+
+    // Step 4: Compute the expected sorted order (ascending alphabetical) from the original data
+    const expected = [...afterNames].sort((a, b) => a.localeCompare(b));
+
+    // Primary assertion: After sorting, names must exactly match the expected ascending order
+    expect(afterNames).toEqual(expected);
+
+    // Extra monotonic ascending check (case-insensitive safe)
+    for (let i = 0; i < afterNames.length - 1; i++) {
+      expect(afterNames[i].localeCompare(afterNames[i + 1])).toBeLessThanOrEqual(0);
+    }
+
   });
 
   test('Sort by name Z → A', async ({ inventoryPage }) => {
-    /**
-     * PURPOSE:
-     * Verify products are sorted alphabetically from Z to A.
-     *
-     * EXPECTED RESULT:
-     * Product names appear in descending alphabetical order.
-     */
+    // Step 1: Force the UI into the OPPOSITE state (A → Z) first.
+    // This ensures that if the Z->A button is broken, the test will definitely fail
+    // because the list will remain in A->Z order.
+    await inventoryPage.sortAndGetNames(SortOption.NAME_ASC);
 
-    const names = await inventoryPage.sortAndGetNames(SortOption.NAME_DESC);
+    // Step 2: Apply the target "Name (Z to A)" sorting
+    await inventoryPage.sortAndGetNames(SortOption.NAME_DESC);
 
-    const expected = [...names].sort().reverse();
+    // Step 3: Capture names after sorting
+    const afterNames = await inventoryPage.getItemNames();
 
-    expect(names).toEqual(expected);
+    // Step 4: Create a trusted "truth" by manually sorting the captured data
+    // We use b.localeCompare(a) to sort Z -> A
+    const expected = [...afterNames].sort((a, b) => b.localeCompare(a));
+
+    // Assertion 1: Verify the list matches our manually sorted version
+    expect(afterNames).toEqual(expected);
+
+    // Assertion 2 (Optional but helpful): Monotonic check for Z -> A
+    // Ensures every item is "greater than" or equal to the next item alphabetically
+    for (let i = 0; i < afterNames.length - 1; i++) {
+      // A result of >= 0 means the current item comes AFTER or is equal to the next item
+      expect(afterNames[i].localeCompare(afterNames[i + 1])).toBeGreaterThanOrEqual(0);
+    }
   });
 
   test('Sort by price low → high', async ({ inventoryPage }) => {
-    /**
-     * PURPOSE:
-     * Verify products are sorted by price from lowest to highest.
-     *
-     * EXPECTED RESULT:
-     * Product prices increase monotonically.
-     */
+    // Step 1: Force the UI into the OPPOSITE state (high → low) first
+    await inventoryPage.sortAndGetPrices(SortOption.PRICE_DESC);
 
-    const prices = await inventoryPage.sortAndGetPrices(SortOption.PRICE_ASC);
+    // Step 2: Apply the target "Price (low to high)" sorting
+    await inventoryPage.sortAndGetPrices(SortOption.PRICE_ASC);
 
-    const expected = [...prices].sort((a, b) => a - b);
+    // Step 3: Capture prices after sorting
+    const afterPrices = await inventoryPage.getItemPrices();
 
-    expect(prices).toEqual(expected);
+    // Step 4: Create a trusted "truth" by manually sorting the captured data
+    // We use a - b to sort low -> high
+    const expected = [...afterPrices].sort((a, b) => a - b);
+
+    // Assertion 1: Verify the list matches our manually sorted version
+    expect(afterPrices).toEqual(expected);
+
+    // Assertion 2 (Optional but helpful): Monotonic check for low -> high
+    // Ensures every price is less than or equal to the next price
+    for (let i = 0; i < afterPrices.length - 1; i++) {
+      expect(afterPrices[i]).toBeLessThanOrEqual(afterPrices[i + 1]);
+    }
   });
 
   test('Sort by price high → low', async ({ inventoryPage }) => {
-    /**
-     * PURPOSE:
-     * Verify products are sorted by price from highest to lowest.
-     *
-     * EXPECTED RESULT:
-     * Product prices decrease monotonically.
-     */
+    // Step 1: Force the UI into the OPPOSITE state (low → high) first
+    await inventoryPage.sortAndGetPrices(SortOption.PRICE_ASC);
 
-    const prices = await inventoryPage.sortAndGetPrices(SortOption.PRICE_DESC);
+    // Step 2: Apply the target "Price (high to low)" sorting
+    await inventoryPage.sortAndGetPrices(SortOption.PRICE_DESC);
 
-    const expected = [...prices].sort((a, b) => b - a);
+    // Step 3: Capture prices after sorting
+    const afterPrices = await inventoryPage.getItemPrices();
 
-    expect(prices).toEqual(expected);
+    // Step 4: Create a trusted "truth" by manually sorting the captured data
+    // We use b - a to sort high -> low
+    const expected = [...afterPrices].sort((a, b) => b - a);
+
+    // Assertion 1: Verify the list matches our manually sorted version
+    expect(afterPrices).toEqual(expected);
+
+    // Assertion 2 (Optional but helpful): Monotonic check for high -> low
+    // Ensures every price is greater than or equal to the next price
+    for (let i = 0; i < afterPrices.length - 1; i++) {
+      expect(afterPrices[i]).toBeGreaterThanOrEqual(afterPrices[i + 1]);
+    }
   });
 });
